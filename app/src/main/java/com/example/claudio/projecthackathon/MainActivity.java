@@ -2,10 +2,14 @@ package com.example.claudio.projecthackathon;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -26,11 +30,10 @@ import java.util.ArrayList;
  */
 
 public class MainActivity extends AppCompatActivity {
-    private EditText Buscar;
     private ListView ListaFor;
-
     private ArrayList<Formulario> formularios = new ArrayList<Formulario>();
     private MyAdapter adapter1;
+    private SearchView sear;
 
 
     @Override
@@ -51,26 +54,54 @@ public class MainActivity extends AppCompatActivity {
         initialize();
 
 
-
-        Buscar.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter1.getFilter().filter(s.toString());
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count,int after) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu, menu);
+        final MenuItem searchItem = menu.findItem(R.id.search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        //permite modificar el hint que el EditText muestra por defecto
+        searchView.setQueryHint("Buscar");
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //se oculta el EditText
+                searchView.setQuery("", false);
+                searchView.setIconified(true);
+
+
+
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        adapter1.getFilter().filter(query);
+
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        adapter1.getFilter().filter(newText);
+
+                        return false;
+                    }
+                });
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter1.getFilter().filter(newText);
+
+                return true;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
     private void initialize() {
-        Buscar = (EditText) findViewById(R.id.ET);
         ListaFor = (ListView)findViewById(R.id.LV);
     }
 
@@ -116,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private class VistaList {
-            RelativeLayout LinearContenedor;
+            LinearLayout LinearContenedor;
             TextView tvName;
             ImageView icono;
         }
@@ -130,10 +161,11 @@ public class MainActivity extends AppCompatActivity {
 
                 holder = new VistaList();
                 convertView = inflater.inflate(R.layout.guia, null);
-                holder.LinearContenedor = (RelativeLayout) convertView.findViewById(R.id.Linea);
-                horlder.tvName = (TextView) convertView.findViewById(R.id.textView);
+                holder.LinearContenedor = (LinearLayout) convertView.findViewById(R.id.Linea);
+                holder.tvName = (TextView) convertView.findViewById(R.id.textView);
                 holder.icono=(ImageView)convertView.findViewById(R.id.imageView);
                 convertView.setTag(holder);
+
             } else {
                 holder = (VistaList) convertView.getTag();
             }
